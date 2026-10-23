@@ -39,6 +39,13 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        // Ensure autoEmailReports is enabled by default for existing users
+        userRepository.findAll().forEach(u -> {
+            if (u.getAutoEmailReports() == null || !u.getAutoEmailReports()) {
+                u.setAutoEmailReports(true);
+                userRepository.save(u);
+            }
+        });
         // Seed Admin User if not present
         User admin = userRepository.findByEmail("admin@solarsaas.com").orElseGet(() -> {
             User newAdmin = new User();

@@ -42,7 +42,7 @@ public class User {
     private String role = "ROLE_USER";
 
     @Column(name = "auto_email_reports", nullable = false)
-    private Boolean autoEmailReports = false;
+    private Boolean autoEmailReports = true;
 
     @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "user", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
@@ -223,3 +223,4 @@ public class User {
         updatedAt = Instant.now();
     }
 }
+
