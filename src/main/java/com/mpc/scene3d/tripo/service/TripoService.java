@@ -30,9 +30,9 @@ public class TripoService {
     @Value("${google.maps.api.key:}")
     private String googleMapsApiKey;
 
-    public TripoService(TripoProperties properties, ObjectMapper objectMapper) {
+    public TripoService(TripoProperties properties) {
         this.properties = properties;
-        this.objectMapper = objectMapper;
+        this.objectMapper = new ObjectMapper();
         this.httpClient = HttpClient.newBuilder()
                 .version(HttpClient.Version.HTTP_2)
                 .connectTimeout(Duration.ofSeconds(20))
