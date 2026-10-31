@@ -6,7 +6,7 @@ public class TripoGenerateRequest {
     private Double latitude;
     private Double longitude;
     private Integer zoom;
-    private String modelVersion = "v3-geometry";
+    private String modelVersion = "v3.1-20260211";
     private boolean waitForResult = false;
     private String apiKey;
 
@@ -49,7 +49,9 @@ public class TripoGenerateRequest {
     }
 
     public String getModelVersion() {
-        return modelVersion != null ? modelVersion : "v3-geometry";
+        return (modelVersion != null && !modelVersion.isBlank() && !"v3-geometry".equalsIgnoreCase(modelVersion))
+                ? modelVersion
+                : "v3.1-20260211";
     }
 
     public void setModelVersion(String modelVersion) {

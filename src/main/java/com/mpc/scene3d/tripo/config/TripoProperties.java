@@ -51,6 +51,6 @@ public class TripoProperties {
     }
 
     public boolean isConfigured() {
-        return apiKey != null && !apiKey.trim().isEmpty();
+        return apiKey != null && apiKey.trim().startsWith("tsk_");
     }
 }

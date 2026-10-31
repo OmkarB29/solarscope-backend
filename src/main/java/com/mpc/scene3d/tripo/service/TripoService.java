@@ -87,13 +87,23 @@ public class TripoService {
     public String submitTask(String imageUrl, String modelVersion, String overrideApiKey) {
         String apiKey = resolveApiKey(overrideApiKey);
         if (apiKey == null || apiKey.trim().isEmpty()) {
-            throw new IllegalStateException("Tripo API Key is not configured. Please supply a valid Tripo API Key.");
+            throw new IllegalArgumentException("Tripo API Secret Key is not configured. Please supply a valid secret key starting with 'tsk_' in the UI or set TRIPO_API_KEY on the server.");
+        }
+        if (apiKey.startsWith("tcli_")) {
+            throw new IllegalArgumentException("Invalid API Key: You provided a Tripo Client ID ('tcli_...'). The Tripo API requires a Secret Key starting with 'tsk_'. Please copy the Secret Key from https://platform.tripo3d.ai.");
+        }
+        if (!apiKey.startsWith("tsk_")) {
+            throw new IllegalArgumentException("Invalid API Key: Tripo Secret Keys must start with 'tsk_'. Please verify your key at https://platform.tripo3d.ai.");
         }
 
         try {
             ObjectNode root = objectMapper.createObjectNode();
             root.put("type", "image_to_model");
-            root.put("model_version", modelVersion != null ? modelVersion : "v3-geometry");
+            String resolvedModel = (modelVersion != null && !modelVersion.isBlank() && !"v3-geometry".equalsIgnoreCase(modelVersion))
+                    ? modelVersion.trim()
+                    : "v3.1-20260211";
+            root.put("model_version", resolvedModel);
+            root.put("model", resolvedModel);
 
             ObjectNode fileNode = root.putObject("file");
             fileNode.put("type", "jpg");
@@ -116,6 +126,9 @@ public class TripoService {
 
             if (response.statusCode() >= 400) {
                 log.error("[TripoService] Error response from Tripo {}: {}", response.statusCode(), response.body());
+                if (response.statusCode() == 401) {
+                    throw new RuntimeException("Tripo API Authentication Failed (HTTP 401). Please verify your Tripo Secret Key ('tsk_...'). Note: Client IDs ('tcli_...') cannot authenticate. Full response: " + response.body());
+                }
                 throw new RuntimeException("Tripo API rejected request with HTTP " + response.statusCode() + ": " + response.body());
             }
 
