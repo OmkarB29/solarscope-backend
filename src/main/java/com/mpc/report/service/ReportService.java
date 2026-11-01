@@ -52,7 +52,10 @@ public class ReportService {
         String emailMessage = null;
 
         if (Boolean.TRUE.equals(user.getAutoEmailReports())) {
-            var history = emailService.sendAnalysisReportEmail(user, savedReport, analysis);
+            String lang = (request.getLanguage() != null && !request.getLanguage().isBlank())
+                    ? request.getLanguage()
+                    : user.getPreferredLanguage();
+            var history = emailService.sendAnalysisReportEmail(user, savedReport, analysis, lang);
             emailStatus = history.getStatus();
             emailMessage = history.getErrorMessage();
         }
@@ -87,11 +90,17 @@ public class ReportService {
 
     @Transactional
     public ReportResponse resendReportEmail(String email, Long id) {
+        return resendReportEmail(email, id, null);
+    }
+
+    @Transactional
+    public ReportResponse resendReportEmail(String email, Long id, String lang) {
         User user = getUser(email);
         Report report = reportRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
 
-        var history = emailService.sendAnalysisReportEmail(user, report, report.getAnalysis());
+        String language = (lang != null && !lang.isBlank()) ? lang : user.getPreferredLanguage();
+        var history = emailService.sendAnalysisReportEmail(user, report, report.getAnalysis(), language);
         return toResponse(report, history.getStatus(), history.getErrorMessage());
     }
 
